@@ -1,6 +1,6 @@
 package main
 
-import "ylog"
+import "github.com/yanzijie/ylog"
 
 var logger ylog.Logger
 
