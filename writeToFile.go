@@ -16,7 +16,7 @@ type FileLogger struct {
 	fileName string
 	filePath string
 	file *os.File		//非错误信息的文件句柄
-	errFile *os.File	//错误日志信息的文件句柄
+	//errFile *os.File	//错误日志信息的文件句柄
 	maxSize int64		//日志文件最大空间
 }
 
@@ -85,12 +85,12 @@ func (f *FileLogger)initFile(){
 	}
 	f.file = fileObj
 
-	errLogName := fmt.Sprintf("%s.err",logName)
-	errFileObj,err := os.OpenFile(errLogName, os.O_CREATE|os.O_WRONLY|os.O_APPEND,0664)
-	if err!=nil{
-		panic(fmt.Errorf("open file %s error : %v",errFileObj,err))
-	}
-	f.errFile = errFileObj
+	//errLogName := fmt.Sprintf("%s.err",logName)
+	//errFileObj,err := os.OpenFile(errLogName, os.O_CREATE|os.O_WRONLY|os.O_APPEND,0664)
+	//if err!=nil{
+	//	panic(fmt.Errorf("open file %s error : %v",errFileObj,err))
+	//}
+	//f.errFile = errFileObj
 }
 
 //按照大小切分文件
@@ -131,15 +131,15 @@ func (f *FileLogger)checkFileTime(file *os.File)bool{
 	}
 	return false	//不用切分文件
 }
-func (f *FileLogger)checkFileTimeErr(file *os.File)bool{
-	fileInfo,_ := file.Stat()
-	newFileName := getFileName()
-	newFileName = newFileName + ".err"
-	if fileInfo.Name() != newFileName{
-		return true //需要拆分
-	}
-	return false	//不用切分文件
-}
+//func (f *FileLogger)checkFileTimeErr(file *os.File)bool{
+//	fileInfo,_ := file.Stat()
+//	newFileName := getFileName()
+//	newFileName = newFileName + ".err"
+//	if fileInfo.Name() != newFileName{
+//		return true //需要拆分
+//	}
+//	return false	//不用切分文件
+//}
 
 //按照时间切分文件,正常输出的log文件
 func (f *FileLogger)splitLogFileTime(file *os.File)*os.File{
@@ -157,22 +157,22 @@ func (f *FileLogger)splitLogFileTime(file *os.File)*os.File{
 	//返回新的
 	return fileObj
 }
-//按照时间切分文件,错误输出的log文件
-func (f *FileLogger)splitLogFileTimeErr(file *os.File)*os.File{
-	//关闭原来的文件
-	_ = file.Close()
-	//1.拼接日志文件路径名字,打开新文件得到文件句柄
-	newFileName := getFileName()
-	newFileName = newFileName + ".err"
-	logName := path.Join(f.filePath,newFileName)
-	fileObj,err := os.OpenFile(logName, os.O_CREATE|os.O_WRONLY|os.O_APPEND,0664)
-	if err!=nil{
-		panic(fmt.Errorf("open file %s error : %v",fileObj,err))
-	}
-
-	//返回新的
-	return fileObj
-}
+////按照时间切分文件,错误输出的log文件
+//func (f *FileLogger)splitLogFileTimeErr(file *os.File)*os.File{
+//	//关闭原来的文件
+//	_ = file.Close()
+//	//1.拼接日志文件路径名字,打开新文件得到文件句柄
+//	newFileName := getFileName()
+//	newFileName = newFileName + ".err"
+//	logName := path.Join(f.filePath,newFileName)
+//	fileObj,err := os.OpenFile(logName, os.O_CREATE|os.O_WRONLY|os.O_APPEND,0664)
+//	if err!=nil{
+//		panic(fmt.Errorf("open file %s error : %v",fileObj,err))
+//	}
+//
+//	//返回新的
+//	return fileObj
+//}
 
 //把日志写入文件`	format日志内容，args-占位符的参数
 func (f *FileLogger)writeContent(lv level,format string, args ...interface{}){
@@ -205,20 +205,20 @@ func (f *FileLogger)writeContent(lv level,format string, args ...interface{}){
 	_,_ = fmt.Fprintln(f.file,logMsg)
 
 	//如果是错误或者崩溃的日志，还要多记录进错误日志文件
-	if lv >= ErrorLevel{
-		//res = f.checkFileSize(f.errFile)
-		//if res == true{
-		//	f.errFile = f.splitLogFile(f.errFile)
-		//}
-		//_,_ = fmt.Fprintln(f.errFile,logMsg)
-
-		//这里判断的是err的log名字
-		res = f.checkFileTimeErr(f.errFile)
-		if res == true{
-			f.errFile = f.splitLogFileTimeErr(f.errFile)
-		}
-		_,_ = fmt.Fprintln(f.errFile,logMsg)
-	}
+	//if lv >= ErrorLevel{
+	//	//res = f.checkFileSize(f.errFile)
+	//	//if res == true{
+	//	//	f.errFile = f.splitLogFile(f.errFile)
+	//	//}
+	//	//_,_ = fmt.Fprintln(f.errFile,logMsg)
+	//
+	//	//这里判断的是err的log名字
+	//	res = f.checkFileTimeErr(f.errFile)
+	//	if res == true{
+	//		f.errFile = f.splitLogFileTimeErr(f.errFile)
+	//	}
+	//	_,_ = fmt.Fprintln(f.errFile,logMsg)
+	//}
 }
 
 //各种日志级别的写文件方法
@@ -244,7 +244,7 @@ func (f *FileLogger)Fatal(format string, args ...interface{}){
 
 func (f *FileLogger)Close(){
 	_ = f.file.Close()
-	_ = f.errFile.Close()
+	//_ = f.errFile.Close()
 }
 
 
